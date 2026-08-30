@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberKavach AI</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
+
+        :root {
+            --ink: #172033;
+            --muted: #64748b;
+            --line: #e2e8f0;
+            --paper: #ffffff;
+            --canvas: #f8fafc;
+            --brand: #4f46e5;
+            --risk: #dc2626;
+            --risk-bg: #fef2f2;
+            --safe: #059669;
+            --safe-bg: #ecfdf5;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { width: 360px; height: 470px; overflow: hidden; }
+        body {
+            display: flex;
+            flex-direction: column;
+            background: var(--canvas);
+            color: var(--ink);
+            font-family: Inter, system-ui, sans-serif;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 15px 18px;
+            background: var(--paper);
+            border-bottom: 1px solid var(--line);
+        }
+        .brand-mark {
+            display: grid;
+            width: 29px;
+            height: 29px;
+            place-items: center;
+            border-radius: 9px;
+            background: var(--brand);
+            color: white;
+        }
+        .brand-name { font-size: 14px; font-weight: 800; letter-spacing: -0.35px; }
+
+        main { display: flex; min-height: 0; flex: 1; flex-direction: column; padding: 20px 18px 16px; }
+        .eyebrow { color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+        .site-name {
+            overflow: hidden;
+            margin-top: 6px;
+            color: var(--ink);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .verdict-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 22px;
+            padding: 14px 0;
+            border-top: 1px solid var(--line);
+            border-bottom: 1px solid var(--line);
+        }
+        .verdict-icon {
+            display: grid;
+            width: 38px;
+            height: 38px;
+            flex: 0 0 auto;
+            place-items: center;
+            border-radius: 11px;
+            background: #eef2ff;
+            color: var(--brand);
+        }
+        .verdict-copy { min-width: 0; flex: 1; }
+        .verdict { color: var(--ink); font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
+        .risk-score { margin-top: 3px; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; }
+        .progress { width: 52px; height: 4px; overflow: hidden; border-radius: 999px; background: #e2e8f0; }
+        .progress span { display: block; width: 0; height: 100%; border-radius: inherit; background: var(--brand); transition: width .35s ease, background-color .2s ease; }
+
+        .reason {
+            display: none;
+            margin-top: 18px;
+            padding-left: 12px;
+            border-left: 3px solid var(--line);
+        }
+        .reason-label { color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+        .reason-text { display: block; margin-top: 5px; color: #334155; font-size: 12px; font-weight: 600; line-height: 1.45; }
+
+        .actions { margin-top: auto; }
+        .report-button {
+            width: 100%;
+            padding: 12px;
+            border: 0;
+            border-radius: 10px;
+            background: var(--brand);
+            color: white;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            transition: background .2s ease, transform .2s ease, opacity .2s ease;
+        }
+        .report-button:hover:not(:disabled) { background: #4338ca; transform: translateY(-1px); }
+        .report-button:disabled { cursor: not-allowed; opacity: .45; }
+
+        .feedback { display: none; margin-top: 12px; text-align: center; }
+        .feedback-actions { display: flex; justify-content: center; gap: 14px; }
+        .feedback button {
+            border: 0;
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: 700;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .feedback button:hover { color: var(--risk); }
+        .feedback button:disabled { cursor: wait; opacity: .55; }
+        .feedback-status { display: block; min-height: 12px; margin-top: 6px; color: var(--muted); font-size: 9px; font-weight: 700; }
+
+        /* Suspicious results use red immediately; safe results stay visually quiet. */
+        body.danger .verdict-icon { background: var(--risk-bg); color: var(--risk); }
+        body.danger .verdict { color: var(--risk); }
+        body.danger .reason { display: block; border-left-color: var(--risk); }
+        body.danger .progress span { background: var(--risk); }
+        body.safe .verdict-icon { background: var(--safe-bg); color: var(--safe); }
+        body.safe .verdict { color: var(--safe); }
+        body.safe .progress span { background: var(--safe); }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <header>
+        <span class="brand-mark" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </span>
+        <span class="brand-name">CyberKavach.AI</span>
+    </header>
+
+    <main>
+        <p class="eyebrow">Current website</p>
+        <p id="url" class="site-name">Checking current page…</p>
+
+        <section class="verdict-row" aria-live="polite">
+            <span id="statusIcon" class="verdict-icon" aria-hidden="true"></span>
+            <div class="verdict-copy">
+                <h1 id="verdict" class="verdict">Checking website</h1>
+                <p id="riskScore" class="risk-score">Risk score pending</p>
+            </div>
+            <span class="progress" aria-hidden="true"><span id="riskBar"></span></span>
+        </section>
+
+        <section id="reason" class="reason">
+            <p class="reason-label">Why this was flagged</p>
+            <span id="reasonText" class="reason-text"></span>
+        </section>
+
+        <div class="actions">
+            <button id="btnDashboard" class="report-button" type="button" disabled>View scan report</button>
+            <div id="feedbackPanel" class="feedback" aria-label="Scan feedback">
+                <div class="feedback-actions">
+                    <button id="btnWrongAlert" type="button">Wrong alert</button>
+                    <button id="btnReportScam" type="button">Report scam</button>
+                </div>
+                <span id="feedbackStatus" class="feedback-status" aria-live="polite"></span>
+            </div>
+        </div>
+    </main>
+
+    <script src="config.js"></script>
+    <script src="popup.js"></script>
+</body>
+</html>

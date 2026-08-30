@@ -1,0 +1,32 @@
+# Local secrets and user-specific configuration
+.env
+.env.*
+!.env.example
+*.pem
+
+# Local databases, scan logs and generated model files
+*.db
+*.sqlite
+*.sqlite3
+backend-api/models/*.joblib
+# Downloaded/locally prepared URL lists can contain unsafe indicators; retain only
+# the documented format in Git and do not publish these local research datasets.
+backend-api/data/*.csv
+backend-api/data/*.txt
+backend-api/data/*.zip
+
+# Python environments and generated files
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Node and operating-system generated files
+node_modules/
+.DS_Store
+Thumbs.db
+extension.crx
+
+# Local alternate Git metadata used because the workspace .git mount is read-only
+.cyberkavach-git/
